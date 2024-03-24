@@ -19,7 +19,7 @@ class Scene:
             
 class Level:
     def __init__(self,scene_list_d1,scene_list_d2,level_index,x,y,rect):
-        self.scene_list = scene_list_d1
+        self.scene_list_d1 = scene_list_d1
         self.scene_list_d2 = scene_list_d2
         self.level_index = level_index
         self.level_unlock = False

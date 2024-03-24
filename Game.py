@@ -13,7 +13,6 @@ class Game:
         self.temp()
         self.screen = pygame.display.set_mode((1400,800))
         self.player = pygame.sprite.GroupSingle()
-        self.game_state = True
         self.level_list = Game.load(self)
         self.player.add(Player(self.level_list[0]))
         self.player.remove()
@@ -47,29 +46,50 @@ class Game:
     def event_loop(self,level):#asi by melo dostat parametr ktery level to ma byt nebo ktera scena
         self.screen = pygame.display.set_mode((1400,800))
         pl = Player(level)
+        dimension = False
         self.player.add(pl)
         scene_index = 0
-        self.scene = level.scene_list[0]
+        self.scene = level.scene_list_d1[0]
         add_butt = Button(50,40,'add',40,'red')
-        while True:
-            if self.game_state:  
-                for event in pygame.event.get():  
-                    self.game_quit(event)
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            Game.pause_menu(self)
-                    if add_butt.activate(event):
-                        Game.add_rect(self)
-                self.clock.tick(60)
-                pygame.display.update()
-                self.screen.fill((250,160,227,255)) 
-                self.player.update(self.scene)    
-                scene_index = pl.scene_index
-                self.scene = level.scene_list[scene_index]
-                self.player.draw(self.screen)  
-                self.scene.draw(self.screen)
-                add_butt.draw(self.screen)
+        scene_list =level.scene_list_d1
+        while True: 
+            for event in pygame.event.get():  
+                self.game_quit(event)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        Game.pause_menu(self)
+                if add_butt.activate(event):
+                    Game.add_rect(self)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_f:
+                        if dimension == False:
+                            dimension = True
+                            scene_list = level.scene_list_d2
+                            pl.collisions(scene_list[scene_index])
+                        else:
+                            dimension = False
+                            scene_list = level.scene_list_d1
+                            pl.collisions(scene_list[scene_index])
+            self.clock.tick(60)
+            pygame.display.update()
+            self.scene = scene_list[scene_index]
+            if dimension:
+                self.screen.fill((250,160,250,255)) 
+                scene_list = level.scene_list_d2
+                #pl.ne
+            else:
+                self.screen.fill((200,160,227,255)) 
 
+            self.player.update(scene_list)    
+            scene_index = pl.scene_index
+            self.player.draw(self.screen)  
+            self.scene.draw(self.screen)
+            add_butt.draw(self.screen)
+
+    def next_scene(self,pl,scene_list):
+        pl.next_scene_right(scene_list)
+        pl.next_scene_left(scene_list)
+        pl.next_scene_up_down(scene_list)
     def game_quit(self,event):
             if event.type == pygame.QUIT:
                 pygame.quit() 

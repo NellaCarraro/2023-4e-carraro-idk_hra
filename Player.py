@@ -15,36 +15,34 @@ class Player(pygame.sprite.Sprite):
         self.scene_index = 0
         self.level = level
 
-    def update(self,scene_index):
-        Player.input(self)
+    def update(self,scene_list):
+        Player.input(self,scene_list)
         Player.animation_standing(self)
-        print(self.scene_index)
-        Player.collisions(self,self.level.scene_list[self.scene_index])
+        Player.collisions(self,scene_list[self.scene_index])
     def animation_standing(self):
         self.anim_index +=0.1
         if self.anim_index > len(self.player_field):
             self.anim_index = 0
         self.image = self.player_field[int(self.anim_index)]
 
-    def input(self):
+    def input(self,scene_list):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
             self.rect.x +=7
-            self.next_scene_right()
+            self.next_scene_right(scene_list)
         if key[pygame.K_a]:
             self.rect.x -=7#moves player
-            self.next_scene_left()
+            self.next_scene_left(scene_list)
         if key[pygame.K_SPACE]:
             if  self.jump == False:
                 self.gravity = 20
                 self.jump = True
-        self.next_scene_up_down()
+        self.next_scene_up_down(scene_list)
         
 
-    def next_scene_right(self):
-        scene_list = self.level.scene_list
+    def next_scene_right(self,scene_list):
         if self.rect.right-self.rect.width/2 >1400:#pokud se ma menit scena a plati ze dalis scena je rifht nebo predchoyi byla left zmeni ji
-            if scene_list[self.scene_index].next_scene_index=='right' and self.scene_index<len(self.level.scene_list):
+            if scene_list[self.scene_index].next_scene_index=='right' and self.scene_index<len(scene_list):
                 self.rect.x = -self.rect.width/2
                 self.scene_index +=1
             elif scene_list[self.scene_index-1].next_scene_index=='left' and self.scene_index>0:
@@ -53,10 +51,9 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.rect.x = 1400 -self.rect.width/2
 
-    def next_scene_left(self):
-        scene_list = self.level.scene_list
+    def next_scene_left(self,scene_list):
         if self.rect.right-self.rect.width/2 <0: #changes scene 
-            if scene_list[self.scene_index].next_scene_index=='left'and self.scene_index<len(self.level.scene_list):
+            if scene_list[self.scene_index].next_scene_index=='left'and self.scene_index<len(scene_list):
                 self.rect.x = 1400 -self.rect.width/2
                 self.scene_index +=1
             elif scene_list[self.scene_index-1].next_scene_index=='right' and self.scene_index>0:
@@ -64,10 +61,9 @@ class Player(pygame.sprite.Sprite):
                 self.scene_index -=1
             else:
                 self.rect.x = 0 -self.rect.width/2
-    def next_scene_up_down(self):
-        scene_list = self.level.scene_list
+    def next_scene_up_down(self,scene_list):
         if self.rect.top + self.rect.height <0:
-            if scene_list[self.scene_index].next_scene_index=='up' and self.scene_index<len(self.level.scene_list):
+            if scene_list[self.scene_index].next_scene_index=='up' and self.scene_index<len(scene_list):
                 self.rect.top = 800-self.rect.width/2
                 self.scene_index +=1
             elif scene_list[self.scene_index-1].next_scene_index=='down' and self.scene_index>0:
@@ -76,13 +72,13 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.rect.x = -self.rect.height/2
         else:
-            self.next_scene_down()
-    def next_scene_down(self):
+            self.next_scene_down(scene_list)
+    def next_scene_down(self,scene_list):
         if self.rect.top + self.rect.height >800 and self.gravity <0:
-            if self.level.scene_list[self.scene_index].next_scene_index=='down'and self.scene_index<len(self.level.scene_list):
+            if scene_list[self.scene_index].next_scene_index=='down'and self.scene_index<len(scene_list):
                 self.rect.top = -self.rect.width/2
                 self.scene_index +=1
-            elif self.level.scene_list[self.scene_index].next_scene_index=='up'and self.scene_index>0:
+            elif scene_list[self.scene_index].next_scene_index=='up'and self.scene_index>0:
                 self.rect.top = -self.rect.width/2
                 self.scene_index -=1
             else:
@@ -99,6 +95,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.collidelistall(scene.rect_list):
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
+                print('collision')
                 if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom < scene.rect_list[i].top +21 and self.gravity<=0:
                     self.rect.bottom = scene.rect_list[i].top
                     self.jump = False
@@ -112,6 +109,7 @@ class Player(pygame.sprite.Sprite):
                     self.rect.right = scene.rect_list[i].left
                 if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
                     self.rect.left = scene.rect_list[i].right
+                    
                
 
                     
