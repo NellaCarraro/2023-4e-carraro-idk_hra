@@ -65,11 +65,11 @@ class Game:
                         if dimension == False:
                             dimension = True
                             scene_list = level.scene_list_d2
-                            pl.collisions(scene_list[scene_index])
+                            pl.harsh_collisions(scene_list[scene_index])
                         else:
                             dimension = False
                             scene_list = level.scene_list_d1
-                            pl.collisions(scene_list[scene_index])
+                            pl.harsh_collisions(scene_list[scene_index])
             self.clock.tick(60)
             pygame.display.update()
             self.scene = scene_list[scene_index]
