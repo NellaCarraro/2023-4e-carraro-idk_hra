@@ -15,7 +15,6 @@ class Game:
         self.player = pygame.sprite.GroupSingle()
         self.level_list = Game.load(self)
         self.player.add(Player(self.level_list[0]))
-        self.player.remove()
         Game.start_screen(self)
 
     def start_screen(self):
@@ -24,20 +23,17 @@ class Game:
         self.screen = pygame.display.set_mode((1200,800))
         start_butt = Button(600,300,'Start a game',160,(255,180,220))
         exit_butt = Button(600,650,'Exit',100,(255,180,220))
-        start_bool = False
-        while True:
+        start_bool = True
+        while start_bool:
             self.screen.blit(start_img,(0,0))
             for event in pygame.event.get():
                 self.game_quit(event)
                 if start_butt.activate(event):
-                    start_bool=True
-                    break
+                    start_bool=False
                 if exit_butt.activate(event):
                     self.save(self.level_list)
                     pygame.quit()
                     quit()
-            if start_bool:
-                break
             start_butt.draw(self.screen)
             exit_butt.draw(self.screen)
             pygame.display.update()
@@ -57,7 +53,7 @@ class Game:
                 self.game_quit(event)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        Game.pause_menu(self)
+                        Game.pause_menu(self,level)
                 if add_butt.activate(event):
                     Game.add_rect(self)
                 if event.type == pygame.KEYDOWN:
@@ -113,6 +109,7 @@ class Game:
         i=0
         y = 150
         butt_list=[]
+        add_butt = Button(50,40,'add',40,'red')
         while i<len(level_list):
             if (i)%5 ==0 and i >0:
                 x = (1200-200)/5
@@ -124,6 +121,8 @@ class Game:
             for event in pygame.event.get():  
                 self.game_quit(event)
                 l=0
+                if add_butt.activate(event):
+                    Game.add_level_menu(self)
                 while l<len(butt_list):
                     if butt_list[l].activate(event):
                         Game.event_loop(self,level_list[l])
@@ -133,43 +132,57 @@ class Game:
             self.screen.fill((250,160,227,255)) 
             for butt in butt_list:
                 butt.draw(self.screen)
-
-    def pause_menu(self):
+                
+    def pause_menu(self,level):
         rect = pygame.Rect(450,100,500,500)
-        cont_butt = Button(700,200,'Continue',100,(0,0,0))
-        levs_butt = Button(700,300,'Level select',75,(0,0,0))
-        menu_butt = Button(700,400,'Main menu',75,(0,0,0))
-        exit_butt = Button(700,500,'Exit',75,(0,0,0))
-
+        butt_list = self.small_menu_buttons()
+        butt_list.append(Button(700,200,'Continue',100,(0,0,0)))
         while True:
+            Game.small_menu_ev_loop(self,butt_list,level)
+            self.clock.tick(60)
+            pygame.draw.rect(self.screen,(255,255,255),rect)
+            for butt in butt_list:
+                butt.draw(self.screen)
+            pygame.display.update()
+            
+    def death_screen(self,level):
+        rect = pygame.Rect(450,100,500,500)
+        butt_list = self.small_menu_buttons()
+        butt_list.append(Button(700,200,'Game Over',100,(0,0,0)))
+        while True:
+            Game.small_menu_ev_loop(self,butt_list,level)
+            self.clock.tick(60)
+            pygame.draw.rect(self.screen,(255,255,255),rect)
+            for butt in butt_list:
+                butt.draw(self.screen)
+            pygame.display.update()
+        
+    def small_menu_buttons(self):
+        butt_list = [Button(700,300,'Level select',75,(0,0,0)),
+                    Button(700,400,'Main menu',75,(0,0,0)),
+                    Button(700,500,'Exit',75,(0,0,0)) ]
+        return butt_list
+
+    def small_menu_ev_loop(self,butt_list,level):
             for event in pygame.event.get():
                 self.game_quit(event)
-                if cont_butt.activate(event):
-                    return
-                if levs_butt.activate(event):
+                if butt_list[3].activate(event):
+                    if butt_list[3].text == 'Continue':
+                        return
+                    if butt_list[3].text == 'Game Over':
+                        Game.event_loop(self,level)
+                if butt_list[0].activate(event):
                     Game.level_select(self,self.level_list)
-                if menu_butt.activate(event):
+                if butt_list[1].activate(event):
                     Game.start_screen(self)
-                if exit_butt.activate(event):
+                if butt_list[2].activate(event):
                     self.save(self.level_list)
                     pygame.quit()
                     exit()
-            self.clock.tick(60)
-            pygame.draw.rect(self.screen,(255,255,255),rect)
-            cont_butt.draw(self.screen)
-            levs_butt.draw(self.screen)
-            menu_butt.draw(self.screen)
-            exit_butt.draw(self.screen)
-            pygame.display.update()
-        
-    def add_rect(self):
-        print('uwu')
-        
     
-
-       
     def temp(self):
         rect_list = [pygame.Rect(-100,701,1600,100),]
+        trap_list = pygame.Rect(1000,0,50,50)
         lev = Scene(rect_list,'right')
         rect_list2 = [pygame.Rect(1000,300,75,75),
              pygame.Rect(-100,701,1600,100),
@@ -191,6 +204,12 @@ class Game:
             lev = Level(scene_list,scene_list2,0,100,500,pygame.Rect(1400,800,100,100))
             level_list.append(lev)
         self.save(level_list)
+    def add_rect(self):
+        print('uwu')
+    def add_level_menu():
+        add_butt = Button(50,40,'add',40,'red')
+        
+        
         
 game = Game()
 

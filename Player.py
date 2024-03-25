@@ -1,20 +1,20 @@
 import pygame
+from Button import Button
+from Game import Game 
 class Player(pygame.sprite.Sprite):
     #incializani metoda
     def __init__(self,level):
         super().__init__()
-        x = level.start_x
-        y = level.start_y
         self.player_field = [pygame.image.load('Images/char1.png')
                              ,pygame.image.load('Images/char2.png')]
         self.image = self.player_field[0]
-        self.rect = self.image.get_rect(bottomleft=(x,y))
+        self.rect = self.image.get_rect(bottomleft=(level.start_x,level.start_y))
+        self.level = level
         self.anim_index = 0
         self.gravity = 0
-        self.jump = False
         self.scene_index = 0
-        self.level = level
-
+        self.jump = False
+    
     def update(self,scene_list):
         Player.input(self,scene_list)
         Player.animation_standing(self)
@@ -113,6 +113,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom -= self.gravity
         if self.gravity >-20:
             self.gravity -= 1
+        if self.rect.collidelistall(scene.trap_list):
+            self.player_death()
         for i in collide_list:
             if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom <= scene.rect_list[i].top +self.rect.height/2:
                 self.rect.bottom = scene.rect_list[i].top
@@ -123,11 +125,16 @@ class Player(pygame.sprite.Sprite):
                 self.gravity=0      
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
-                if self.rect.right > scene.rect_list[i].left and self.rect.right < scene.rect_list[i].right-scene.rect_list[i].width/2:
+                if self.rect.right >= scene.rect_list[i].left and self.rect.right < scene.rect_list[i].right-scene.rect_list[i].width/2:
                     self.rect.right = scene.rect_list[i].left
                 if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
                     self.rect.left = scene.rect_list[i].right
+    def player_death(self):
+        butt  = Button(700,400,'Game Over',100,(0,0,0))
+        Game.death_screen(self)
         
+            
+            
                
 
                     

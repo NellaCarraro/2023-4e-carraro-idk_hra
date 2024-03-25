@@ -6,8 +6,8 @@ class Scene:
     def __init__(self,rect_list,next_scene_index):
         self.rect_list = rect_list
         self.next_scene_index = next_scene_index
- 
-            
+        self.trap_list = []
+    
     def open_level(self,lel_number):
         print(f'level: {lel_number}')
         
