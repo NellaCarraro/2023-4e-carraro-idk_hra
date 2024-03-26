@@ -12,10 +12,10 @@ class Scene:
         print(f'level: {lel_number}')
         
     def draw(self,screen):
-        i = 0
-        while i <len(self.rect_list):
-            pygame.draw.rect(screen,(255,255,255),self.rect_list[i])
-            i +=1
+        for rect in self.rect_list:
+            pygame.draw.rect(screen,(178,100,255),rect)
+        for rect in self.trap_list:
+            pygame.draw.rect(screen,(204,0,100),rect)
             
 class Level:
     def __init__(self,scene_list_d1,scene_list_d2,level_index,x,y,rect):

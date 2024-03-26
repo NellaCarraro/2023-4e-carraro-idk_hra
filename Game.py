@@ -19,8 +19,7 @@ class Game:
 
     def start_screen(self):
         self.clock.tick(60)
-        start_img = pygame.image.load('Images/start_screen.webp')
-        self.screen = pygame.display.set_mode((1200,800))
+        start_img = pygame.image.load('Images/Main_menu.png')
         start_butt = Button(600,300,'Start a game',160,(255,180,220))
         exit_butt = Button(600,650,'Exit',100,(255,180,220))
         start_bool = True
@@ -59,28 +58,35 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_f:
                         if dimension == False:
-                            dimension = True
                             scene_list = level.scene_list_d2
-                            pl.harsh_collisions(scene_list[scene_index])
+                            if pl.harsh_collisions(scene_list[scene_index])==False:
+                                dimension = True
+                                scene_list = level.scene_list_d2
+                            else:
+                                scene_list = level.scene_list_d1
                         else:
-                            dimension = False
                             scene_list = level.scene_list_d1
-                            pl.harsh_collisions(scene_list[scene_index])
+                            if pl.harsh_collisions(scene_list[scene_index])==False:
+                                dimension = False
+                                scene_list = level.scene_list_d1
+                            else:
+                                scene_list = level.scene_list_d2
+                            
             self.clock.tick(60)
             pygame.display.update()
             self.scene = scene_list[scene_index]
             if dimension:
                 self.screen.fill((250,160,250,255)) 
                 scene_list = level.scene_list_d2
-                #pl.ne
             else:
                 self.screen.fill((200,160,227,255)) 
-
-            self.player.update(scene_list)    
+            self.player.update(scene_list)
             scene_index = pl.scene_index
             self.player.draw(self.screen)  
             self.scene.draw(self.screen)
             add_butt.draw(self.screen)
+            if pl.death:
+                Game.death_screen(self,level)
 
     def next_scene(self,pl,scene_list):
         pl.next_scene_right(scene_list)
@@ -104,18 +110,18 @@ class Game:
             print('chybicka se vloudila')
             
     def level_select(self,level_list):
-        self.screen = pygame.display.set_mode((1200,800))
-        x = (1200-200)/5
+        width = (1400-250)/5
+        x = width
         i=0
-        y = 150
+        y = 225
         butt_list=[]
         add_butt = Button(50,40,'add',40,'red')
         while i<len(level_list):
             if (i)%5 ==0 and i >0:
-                x = (1200-200)/5
-                y = y +175
+                x = width
+                y = y +200
             butt_list.append(Button(x,y,f'{i+1}',180,(255,255,255)))
-            x +=(1200-200)/5
+            x +=width
             i+=1
         while True:
             for event in pygame.event.get():  
@@ -138,7 +144,8 @@ class Game:
         butt_list = self.small_menu_buttons()
         butt_list.append(Button(700,200,'Continue',100,(0,0,0)))
         while True:
-            Game.small_menu_ev_loop(self,butt_list,level)
+            if Game.small_menu_ev_loop(self,butt_list,level):
+                return
             self.clock.tick(60)
             pygame.draw.rect(self.screen,(255,255,255),rect)
             for butt in butt_list:
@@ -168,7 +175,7 @@ class Game:
                 self.game_quit(event)
                 if butt_list[3].activate(event):
                     if butt_list[3].text == 'Continue':
-                        return
+                        return True
                     if butt_list[3].text == 'Game Over':
                         Game.event_loop(self,level)
                 if butt_list[0].activate(event):
@@ -182,24 +189,26 @@ class Game:
     
     def temp(self):
         rect_list = [pygame.Rect(-100,701,1600,100),]
-        trap_list = pygame.Rect(1000,0,50,50)
+        trap_list = pygame.Rect(600,0,50,50)
         lev = Scene(rect_list,'right')
+        lev.trap_list.append(trap_list)
         rect_list2 = [pygame.Rect(1000,300,75,75),
              pygame.Rect(-100,701,1600,100),
              pygame.Rect(500,550,75,100),
-             pygame.Rect(1300,100,100,300),
+             pygame.Rect(1300,50,100,300),
              pygame.Rect(800,400,75,125),
-             pygame.Rect(1100,300,100,75),
+             pygame.Rect(1100,150,100,75),
              ]
         rect_list3 = [pygame.Rect(-400,781,1600,100),]
         lev2 = Scene(rect_list2,'up')
+        lev2.trap_list.append(trap_list)
         lev3 = Scene(rect_list3,'left')
         scene_list = [lev,lev2,lev3,lev3]
         scene_list2 = [lev2,lev3,lev,lev]
         i = 0
         level_list = [Level(scene_list,scene_list2,0,0,500,pygame.Rect(1400,800,100,100))]
         
-        while i<=18:
+        while i<=13:
             i+=1
             lev = Level(scene_list,scene_list2,0,100,500,pygame.Rect(1400,800,100,100))
             level_list.append(lev)

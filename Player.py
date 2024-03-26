@@ -1,12 +1,14 @@
 import pygame
 from Button import Button
-from Game import Game 
+
 class Player(pygame.sprite.Sprite):
     #incializani metoda
     def __init__(self,level):
         super().__init__()
-        self.player_field = [pygame.image.load('Images/char1.png')
-                             ,pygame.image.load('Images/char2.png')]
+        self.player_field = [pygame.image.load('Images/player_stand_1.png')
+                             ,pygame.image.load('Images/player_stand_2.png')
+                             ,pygame.image.load('Images/player_stand_3.png')
+                             ,pygame.image.load('Images/player_stand_4.png')]
         self.image = self.player_field[0]
         self.rect = self.image.get_rect(bottomleft=(level.start_x,level.start_y))
         self.level = level
@@ -14,11 +16,19 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0
         self.scene_index = 0
         self.jump = False
+        self.double_jump_timer = 30
+        self.double_jump = False
+        self.death = False
     
-    def update(self,scene_list):
+    def update(self,scene_list): 
         Player.input(self,scene_list)
+        if Player.collisions(self,scene_list[self.scene_index]):
+            self.death = True
         Player.animation_standing(self)
-        Player.collisions(self,scene_list[self.scene_index])
+        self.next_scene(scene_list)
+       
+            
+        
     def animation_standing(self):
         self.anim_index +=0.1
         if self.anim_index > len(self.player_field):
@@ -28,15 +38,20 @@ class Player(pygame.sprite.Sprite):
     def input(self,scene_list):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
-            self.rect.x +=7
-            self.next_scene_right(scene_list)
+            self.rect.x +=7.5
         if key[pygame.K_a]:
-            self.rect.x -=7#moves player
-            self.next_scene_left(scene_list)
+            self.rect.x -=7.5
         if key[pygame.K_SPACE]:
-            if  self.jump == False:
+            if  self.jump == False and self.gravity <=0:
                 self.gravity = 20
                 self.jump = True
+                self.double_jump_timer = pygame.time.get_ticks()
+            elif self.double_jump == False and pygame.time.get_ticks()>self.double_jump_timer+400:
+                self.gravity =15
+                self.double_jump = True
+    def next_scene(self,scene_list):
+        self.next_scene_left(scene_list)
+        self.next_scene_right(scene_list)
         self.next_scene_up_down(scene_list)
         
 
@@ -61,43 +76,47 @@ class Player(pygame.sprite.Sprite):
                 self.scene_index -=1
             else:
                 self.rect.x = 0 -self.rect.width/2
+
     def next_scene_up_down(self,scene_list):
-        if self.rect.top + self.rect.height <0:
+        if self.rect.bottom <0:
             if scene_list[self.scene_index].next_scene_index=='up' and self.scene_index<len(scene_list):
-                self.rect.top = 800-self.rect.width/2
+                self.rect.bottom = 800
                 self.scene_index +=1
             elif scene_list[self.scene_index-1].next_scene_index=='down' and self.scene_index>0:
-                self.rect.top = 800-self.rect.width/2
+                self.rect.bottom = 800 
                 self.scene_index -=1
             else:
-                self.rect.x = -self.rect.height/2
+                self.rect.bottom = 1
         else:
             self.next_scene_down(scene_list)
+
     def next_scene_down(self,scene_list):
-        if self.rect.top + self.rect.height >800 and self.gravity <0:
+        if self.rect.bottom >800 and self.gravity <0:
             if scene_list[self.scene_index].next_scene_index=='down'and self.scene_index<len(scene_list):
-                self.rect.top = -self.rect.width/2
+                self.rect.bottom = 1
                 self.scene_index +=1
-            elif scene_list[self.scene_index].next_scene_index=='up'and self.scene_index>0:
-                self.rect.top = -self.rect.width/2
+            elif scene_list[self.scene_index-1].next_scene_index=='up'and self.scene_index>0:
+                self.rect.bottom = 1
                 self.scene_index -=1
             else:
-                self.rect.x = 800-self.rect.width/2
+                self.rect.bottom = 800
     
     def start_position(self,x,y):
         self.x = x
         self.y = y
     def collisions(self,scene):
         self.rect.bottom -= self.gravity
-        if self.gravity >-20:
+        if self.gravity >-15:
             self.gravity -= 1
-            
+        if self.rect.collidelistall(scene.trap_list):
+            return True
         if self.rect.collidelistall(scene.rect_list):
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
                 if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom < scene.rect_list[i].top +21 and self.gravity<=0:
                     self.rect.bottom = scene.rect_list[i].top
                     self.jump = False
+                    self.double_jump = False
                     self.gravity=-1  
                 if self.rect.top < scene.rect_list[i].bottom and self.rect.top > scene.rect_list[i].bottom -21 and self.gravity>=0:
                     self.rect.top = scene.rect_list[i].bottom
@@ -110,28 +129,13 @@ class Player(pygame.sprite.Sprite):
                     self.rect.left = scene.rect_list[i].right
                     
     def harsh_collisions(self,scene):
-        self.rect.bottom -= self.gravity
-        if self.gravity >-20:
-            self.gravity -= 1
         if self.rect.collidelistall(scene.trap_list):
-            self.player_death()
-        for i in collide_list:
-            if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom <= scene.rect_list[i].top +self.rect.height/2:
-                self.rect.bottom = scene.rect_list[i].top
-                self.jump = False
-                self.gravity=-1  
-            if self.rect.top < scene.rect_list[i].bottom and self.rect.top > scene.rect_list[i].bottom -self.rect.height/2:
-                self.rect.top = scene.rect_list[i].bottom
-                self.gravity=0      
-            collide_list = self.rect.collidelistall(scene.rect_list)
-            for i in collide_list:
-                if self.rect.right >= scene.rect_list[i].left and self.rect.right < scene.rect_list[i].right-scene.rect_list[i].width/2:
-                    self.rect.right = scene.rect_list[i].left
-                if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
-                    self.rect.left = scene.rect_list[i].right
-    def player_death(self):
-        butt  = Button(700,400,'Game Over',100,(0,0,0))
-        Game.death_screen(self)
+            return 
+        Player.collisions(self,scene)
+        if self.rect.collidelistall(scene.rect_list):
+            return
+        return False
+        
         
             
             
