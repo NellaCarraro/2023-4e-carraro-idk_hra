@@ -160,18 +160,16 @@ class Player(pygame.sprite.Sprite):
                 if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
                     self.rect.left = scene.rect_list[i].right
 
-    def collectibles(self,collectible_list):
-        for list in collectible_list:
-            if self.rect.colliderect(list[1]):
-                list[0]=True
-        return collectible_list
-
     def harsh_collisions(self,scene):
         if self.rect.collidelistall(scene.trap_list):
             return 
         Player.collisions(self,scene)
         if self.rect.collidelistall(scene.rect_list):
             return
+        return False
+    def collect_collision(self,collectable):
+        if self.rect.colliderect(collectable):
+            return True
         return False
     
     def win(self,scene_list):

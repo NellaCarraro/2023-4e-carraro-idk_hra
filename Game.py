@@ -53,6 +53,7 @@ class Game:
     def event_loop(self,level_id):
         level = self.level_list[level_id]
         display = pygame.image.load('Images/Main_menu.png').convert()
+        score_border = pygame.image.load('Images/score_border.png').convert_alpha()
         pl = Player(level)
         self.player.add(pl)
         self.screen = pygame.display.set_mode((1800,800))
@@ -61,16 +62,15 @@ class Game:
         self.scene = level.scene_list_d1[0]#doesnt need to be self.scene
         level.set_collectibles(False)
         lab_list = [
-                    Button(850,40,level.get_collectibles(),85,(143, 120, 173)),
-                    Button(700,40,'0',75,(143, 120, 173)),
-                    Button(550,40,f'Level {level_id+1}: ',75,(143, 120, 173))
+                    Button(900,30,level.get_collectibles(),75,(143, 120, 173)),
+                    Button(740,30,'0',75,(143, 120, 173)),
+                    Button(550,30,f'Level {level_id+1}: ',85,(143, 120, 173))
                      ]
-        
-        
-
+    
         scene_index = 0
         self.dimension = False
         dev_state = True
+        dev_button_list = Game.dev_menu(self)
         start_time = time.time()
 
         while True: 
@@ -98,19 +98,22 @@ class Game:
                     if event.key == pygame.K_F12:
                         self.screen = pygame.display.set_mode((1800,800))
                         dev_state = True
-            if dev_state:
-                Game.dev_menu(self)
+            
             self.scene = scene_list[scene_index]
             if self.dimension:
-                level.scene_list_d2[scene_index].collectible_list = pl.collectibles(level.scene_list_d2[scene_index].collectible_list)
                 self.screen.blit(display,(0,0))
             else:
-                level.scene_list_d1[scene_index].collectible_list = pl.collectibles(level.scene_list_d1[scene_index].collectible_list)
                 if pl.win(scene_list):
                     Game.next_level_menu(self,level_id,start_time)
                 self.screen.fill((200,160,227,255)) 
+
+            for collectable in self.scene.collectable_list:
+                if collectable[0]==False:
+                    collectable[0] = pl.collect_collision(collectable[1])
+            Game.draw_dev_menu(self,dev_state,dev_button_list)
             self.player.update(scene_list)
             scene_index = pl.scene_index
+            self.screen.blit(score_border,(0,0))
             Game.update_score(self,lab_list,start_time,level)
             Game.draw_event_loop(self)
             pygame.draw.rect(self.screen,(100,200,200),level.win_square) #can get rid of this 
@@ -120,7 +123,7 @@ class Game:
             self.clock.tick(60)
 
     def update_score(self,lab_list,start_time,level):
-        lab_list[0].change_text(level.get_collectibles()) 
+        #lab_list[0].change_text(level.get_collectibles()) 
         curr_time = time.time()-start_time
         lab_list[1].change_text(f'{int(curr_time/60)}:{int(curr_time%60)}') 
         for lab in lab_list:
@@ -152,19 +155,21 @@ class Game:
             print('chybicka se vloudila')
             
     def level_select(self,level_list):
-        width = (1400-250)/5
-        x = width
+        level_label = Button(700,100,'Select a level',125,(143, 120, 173))
+        backround = pygame.image.load('Images/level_select.png').convert_alpha()
+        width = (1300)/4
+        x = 50 + width/2
         i=0
-        y = 225
+        y = 340
         butt_list=[]
         while i<len(level_list):
-            if (i)%5 ==0 and i >0:
-                x = width
-                y = y +200
-            butt_list.append(Button(x,y,f'{i+1}',180,(255,255,255)))
+            butt_list.append(Button(x,y,f'{i+1}',180,(143, 120, 173)))
             x +=width
-            i+=1    
-        add = Button(x,y,'+',180,(255,255,255))
+            i+=1 
+            if (i)%4 ==0 and i >0:
+                x= 50 + width/2
+                y = y +290   
+        add = Button(x,y,'+',180,(143, 120, 173))
         while True:
             for event in pygame.event.get():  
                 self.game_quit(event)
@@ -181,7 +186,8 @@ class Game:
                         Game.start_screen(self)
             self.clock.tick(60)
             pygame.display.update()
-            self.screen.fill((250,160,227,255)) 
+            self.screen.blit(backround,(0,0))
+            level_label.draw(self.screen)
             for butt in butt_list:
                 add.draw(self.screen)
                 butt.draw(self.screen)
@@ -303,11 +309,11 @@ class Game:
         cl = pygame.Rect(200,400,50,50)
         lev = Scene(rect_list,'left')
         lev2 = Scene(rect_list,'')
-        lev.trap_list.append(trap_list)
-        lev2.collectible_list.append([False,pygame.Rect(50,630,50,50)])
-        lev.collectible_list.append([False,pygame.Rect(100,630,50,50)])
+        #lev.trap_list.append(trap_list)
+        #lev2.collectible_list.append([False,pygame.Rect(50,630,50,50)])
+        lev.collectable_list.append([False,pygame.Rect(100,630,50,50)])
         scene_list = [lev,lev2]
-        scene_list2 = [lev2]
+        scene_list2 = [lev2,lev]
 
         level_list = [Level(scene_list,scene_list2,0,0,500,pygame.Rect(1300,750,100,100)),Level(scene_list,scene_list2,0,0,500,pygame.Rect(1300,750,100,100))]
         level_list[0].level_unlock = True
@@ -315,12 +321,24 @@ class Game:
 
     def dev_menu(self):
         butt_list =[
-            Button(1500,25,'add sc d1',40,(0,0,0)),
-            Button(1700,25,'add sc d2',40,(0,0,0)),
-                    ]
-        for butt in butt_list:
-            butt.draw(self.screen)
-        return False
+                Button(1500,25,'add sc',40,(0,0,0)),
+                Button(1500,50,'add platform',40,(0,0,0)),
+                Button(1500,75,'add trap',40,(0,0,0)),
+                Button(1500,100,'add collectible',40,(0,0,0)),]
+        return butt_list
+                    
+    def draw_dev_menu(self,dev_state,dev_butt_list):
+        if dev_state:
+            for butt in dev_butt_list:
+                butt.draw(self.screen)
+    
+    def dev_event_loop(self,event,dev_butt_list,level_id):
+        if dev_butt_list[0].activate(event):
+            self.level_list[level_id].rect_listd1.append()
+        if dev_butt_list[1].activate(event):
+        if dev_butt_list[2].activate(event):
+        if dev_butt_list[3].activate(event):
+
     
     def add_level(self):
         rect_list = [pygame.Rect(0,750,160,100),]
