@@ -5,50 +5,82 @@ class Player(pygame.sprite.Sprite):
     #incializani metoda
     def __init__(self,level):
         super().__init__()
-        self.player_field = [pygame.image.load('Images/player_stand_1.png')
+        self.player_image_list = [
+                             [pygame.image.load('Images/player_stand_1.png')
                              ,pygame.image.load('Images/player_stand_2.png')
                              ,pygame.image.load('Images/player_stand_3.png')
-                             ,pygame.image.load('Images/player_stand_4.png')]
-        self.image = self.player_field[0]
+                             ,pygame.image.load('Images/player_stand_4.png')],
+                             [pygame.image.load('Images/player_run1.png')
+                             ,pygame.image.load('Images/player_run2.png')
+                             ,pygame.image.load('Images/player_run3.png')
+                             ,pygame.image.load('Images/player_run4.png')]
+                             ]
+        self.image = self.player_image_list[0][0]
         self.rect = self.image.get_rect(bottomleft=(level.start_x,level.start_y))
         self.level = level
         self.anim_index = 0
+        self.anime_list_index = 0
         self.gravity = 0
         self.scene_index = 0
         self.jump = False
         self.double_jump_timer = 30
         self.double_jump = False
         self.death = False
+        self.face_side = 'r'
     
     def update(self,scene_list): 
-        Player.input(self,scene_list)
+        Player.input(self)
         if Player.collisions(self,scene_list[self.scene_index]):
             self.death = True
-        Player.animation_standing(self)
+        Player.animation(self)
         self.next_scene(scene_list)
        
             
         
-    def animation_standing(self):
-        self.anim_index +=0.1
-        if self.anim_index > len(self.player_field):
+    def animation(self):
+        anim_list = self.player_image_list[self.anime_list_index]
+        self.anim_index +=0.12
+        if self.anim_index > len(anim_list):
             self.anim_index = 0
-        self.image = self.player_field[int(self.anim_index)]
+        self.image = anim_list[int(self.anim_index)]
 
-    def input(self,scene_list):
+    def flip_image_list(self,player_image_list):#i dont get it it should work the easier way but it doesnt so here we are
+        i=0
+        while i<len(player_image_list):
+            o = 0
+            while o< len(player_image_list[i]):
+                player_image_list[i][o] = pygame.transform.flip(player_image_list[i][o],True,False)
+                o+=1
+            i+=1
+        return player_image_list
+    
+    def input(self):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
-            self.rect.x +=7.5
-        if key[pygame.K_a]:
-            self.rect.x -=7.5
+            self.rect.x +=6
+            self.anime_list_index = 1
+            if self.face_side == 'l':
+                self.face_side = 'r'
+                self.player_image_list = self.flip_image_list(self.player_image_list)
+        elif key[pygame.K_a]:
+            self.rect.x -=6
+            self.anime_list_index = 1
+            if self.face_side == 'r':
+                self.face_side = 'l'
+                self.player_image_list = self.flip_image_list(self.player_image_list)
+
+        else:
+            self.anime_list_index = 0
+        
         if key[pygame.K_SPACE]:
             if  self.jump == False and self.gravity <=0:
-                self.gravity = 20
+                self.gravity = 15
                 self.jump = True
                 self.double_jump_timer = pygame.time.get_ticks()
-            elif self.double_jump == False and pygame.time.get_ticks()>self.double_jump_timer+400:
-                self.gravity =15
+            elif self.double_jump == False and pygame.time.get_ticks()>self.double_jump_timer+300:
+                self.gravity =10
                 self.double_jump = True
+
     def next_scene(self,scene_list):
         self.next_scene_left(scene_list)
         self.next_scene_right(scene_list)
@@ -127,7 +159,13 @@ class Player(pygame.sprite.Sprite):
                     self.rect.right = scene.rect_list[i].left
                 if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
                     self.rect.left = scene.rect_list[i].right
-                    
+
+    def collectibles(self,collectible_list):
+        for list in collectible_list:
+            if self.rect.colliderect(list[1]):
+                list[0]=True
+        return collectible_list
+
     def harsh_collisions(self,scene):
         if self.rect.collidelistall(scene.trap_list):
             return 
@@ -135,7 +173,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.collidelistall(scene.rect_list):
             return
         return False
-        
+    
+    def win(self,scene_list):
+        if self.rect.colliderect(self.level.win_square) and self.scene_index+1 >= len(scene_list):
+            return True
+        return False
         
             
             
