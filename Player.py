@@ -13,7 +13,15 @@ class Player(pygame.sprite.Sprite):
                              [pygame.image.load('Images/player_run1.png')
                              ,pygame.image.load('Images/player_run2.png')
                              ,pygame.image.load('Images/player_run3.png')
-                             ,pygame.image.load('Images/player_run4.png')]
+                             ,pygame.image.load('Images/player_run4.png')],
+                             [pygame.image.load('Images/player_jump_1.png')
+                             ,pygame.image.load('Images/player_jump_2.png')
+                             ,pygame.image.load('Images/player_jump_3.png')
+                             ,pygame.image.load('Images/player_jump_4.png')],
+                             [pygame.image.load('Images/player_fall_1.png')
+                             ,pygame.image.load('Images/player_fall_2.png')
+                             ,pygame.image.load('Images/player_fall_3.png')
+                             ,pygame.image.load('Images/player_fall_4.png')]
                              ]
         self.image = self.player_image_list[0][0]
         self.rect = self.image.get_rect(bottomleft=(level.start_x,level.start_y))
@@ -58,28 +66,35 @@ class Player(pygame.sprite.Sprite):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
             self.rect.x +=6
-            self.anime_list_index = 1
+            if self.anime_list_index <2:
+                self.anime_list_index = 1
             if self.face_side == 'l':
                 self.face_side = 'r'
                 self.player_image_list = self.flip_image_list(self.player_image_list)
         elif key[pygame.K_a]:
             self.rect.x -=6
-            self.anime_list_index = 1
+            if self.anime_list_index <2:
+                self.anime_list_index = 1
             if self.face_side == 'r':
                 self.face_side = 'l'
                 self.player_image_list = self.flip_image_list(self.player_image_list)
 
         else:
-            self.anime_list_index = 0
+            if self.anime_list_index <2:
+                self.anime_list_index = 0
         
         if key[pygame.K_SPACE]:
             if  self.jump == False and self.gravity <=0:
                 self.gravity = 15
                 self.jump = True
                 self.double_jump_timer = pygame.time.get_ticks()
+                self.anime_list_index = 2
             elif self.double_jump == False and pygame.time.get_ticks()>self.double_jump_timer+300:
                 self.gravity =10
                 self.double_jump = True
+                self.anime_list_index = 2
+        if self.gravity <0 and self.jump == True:
+            self.anime_list_index = 3
 
     def next_scene(self,scene_list):
         self.next_scene_left(scene_list)
@@ -136,6 +151,7 @@ class Player(pygame.sprite.Sprite):
     def start_position(self,x,y):
         self.x = x
         self.y = y
+
     def collisions(self,scene):
         self.rect.bottom -= self.gravity
         if self.gravity >-15:
@@ -145,8 +161,10 @@ class Player(pygame.sprite.Sprite):
         if self.rect.collidelistall(scene.rect_list):
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
-                if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom < scene.rect_list[i].top +21 and self.gravity<=0:
+                if self.rect.bottom > scene.rect_list[i].top and self.rect.bottom < scene.rect_list[i].top -self.gravity+1  and self.gravity<=0:
                     self.rect.bottom = scene.rect_list[i].top
+                    if self.jump == True:
+                        self.anime_list_index = 0
                     self.jump = False
                     self.double_jump = False
                     self.gravity=-1  
@@ -155,9 +173,9 @@ class Player(pygame.sprite.Sprite):
                     self.gravity=0      
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
-                if self.rect.right > scene.rect_list[i].left and self.rect.right < scene.rect_list[i].right-scene.rect_list[i].width/2:
+                if self.rect.right > scene.rect_list[i].left and self.rect.right < scene.rect_list[i].left+14:
                     self.rect.right = scene.rect_list[i].left
-                if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-scene.rect_list[i].width/2:
+                if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-14:
                     self.rect.left = scene.rect_list[i].right
 
     def harsh_collisions(self,scene):
@@ -167,6 +185,7 @@ class Player(pygame.sprite.Sprite):
         if self.rect.collidelistall(scene.rect_list):
             return
         return False
+    
     def collect_collision(self,collectable):
         if self.rect.colliderect(collectable):
             return True
