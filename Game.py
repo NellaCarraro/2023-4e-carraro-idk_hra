@@ -304,13 +304,13 @@ class Game:
             scene.dev_draw(self.screen)
     
     def dev_event_loop(self,event,dev_butt_list,level,scene,background):
-        if dev_butt_list[0].activate(event):
+        if dev_butt_list[0].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_1):
             level.add_scene(self.screen)
-        if dev_butt_list[1].activate(event):
+        if dev_butt_list[1].activate(event) or  (event.type == pygame.KEYDOWN and event.key == pygame.K_2):
             scene.add_rectangle_menu(self.screen,background)
-        if dev_butt_list[2].activate(event):
+        if dev_butt_list[2].activate(event) or  (event.type == pygame.KEYDOWN and event.key == pygame.K_3):
             scene.add_collectable(self.screen,background)
-        if dev_butt_list[3].activate(event):
+        if dev_butt_list[3].activate(event) or  (event.type == pygame.KEYDOWN and event.key == pygame.K_4):
             scene.edit_rectangle(self.screen,level,background)
         return level
 

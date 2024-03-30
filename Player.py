@@ -79,12 +79,12 @@ class Player(pygame.sprite.Sprite):
         
         if key[pygame.K_SPACE]:
             if  self.jump == False and self.gravity <=0:
-                self.gravity = 15
+                self.gravity = 14
                 self.jump = True
                 self.double_jump_timer = pygame.time.get_ticks()
                 self.anime_list_index = 2
             elif self.double_jump == False and pygame.time.get_ticks()>self.double_jump_timer+300:
-                self.gravity =10
+                self.gravity =9
                 self.double_jump = True
                 self.anime_list_index = 2
         if self.gravity <0 and self.jump == True:
@@ -149,7 +149,7 @@ class Player(pygame.sprite.Sprite):
     def collisions(self,scene):
         self.rect.bottom -= self.gravity
         if self.gravity >-15:
-            self.gravity -= 1
+            self.gravity -= 0.85
         if self.rect.collidelistall(scene.trap_list):
             return True
         if self.rect.collidelistall(scene.rect_list):

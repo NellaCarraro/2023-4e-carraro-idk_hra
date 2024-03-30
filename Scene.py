@@ -55,6 +55,7 @@ class Scene:
                     if event.key == pygame.K_ESCAPE:
                         return
             self.draw(screen,background)
+            self.dev_draw(screen)
             pygame.draw.rect(screen,(255,0,0),rect)
             clock.tick(60)
             pygame.display.update()
@@ -66,9 +67,7 @@ class Scene:
         while True:
             for event in pygame.event.get():
                 for butt in butt_list:
-                    if butt.activate(event):
-                        butt.change_color((255,0,0))
-                        butt.draw(screen)
+                    if butt.activate(event): 
                         rect = self.add_rectangle(screen,background)
                         if rect != None:
                             if butt.text == 'add platform':
@@ -76,9 +75,16 @@ class Scene:
                             if butt.text == 'add trap':
                                 self.trap_list.append(rect)
                         return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        return
+                    if event.type == pygame.KEYDOWN:
+                        rect = self.add_rectangle(screen,background)
+                        if rect != None:
+                            if event.key == pygame.K_ESCAPE:
+                                if event.key == pygame.K_q:
+                                    self.rect_list.append(rect)
+                                    return
+                                if event.key  == pygame.K_e:
+                                    self.trap_list.append(rect)
+                                    return
             for butt in butt_list:
                 butt.draw(screen)
             clock.tick(60)
@@ -162,6 +168,7 @@ class Scene:
                         else:return delete_list
 
             self.draw(screen,background)
+            self.dev_draw(screen)
             pygame.draw.rect(screen,(255,0,0),rect_list[i])
             clock.tick(60)
             pygame.display.update()
@@ -271,6 +278,8 @@ class Level:
         add_button = Button(700,400,'Add scene',75,(255,0,0))
         while True:
             for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    return
                 for butt in butt_list:
                     if butt.activate(event):
                         butt.change_color((255,0,0))
