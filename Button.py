@@ -17,9 +17,11 @@ class Button():
                 return True
     
     def change_text(self,text):
+        self.text = text
         self.text_image = self.text_font.render(text,False,self.color)
 
     def change_color(self,color):
+        self.color = color
         self.text_image = self.text_font.render(self.text,False,color)
 
     def draw(self,screen):
@@ -40,13 +42,13 @@ class Button():
         i=0
         y = 340
         while i<len(level_list):
-            butt_list.append(Button(x,y,f'{i+1}',180,(143, 120, 173)))
+            butt_list.append(Button(x,y,f'{i+1}',180,(128, 99, 166)))
             x +=width
             i+=1 
             if (i)%4 ==0 and i >0:
                 x= 50 + width/2
                 y = y +290   
-        butt_list.append(Button(x,y,'+',180,(143, 120, 173)))
+        butt_list.append(Button(x,y,'+',180,(128, 99, 166)))
         return butt_list
     
     def add_level_select_button(butt_list):
@@ -58,12 +60,12 @@ class Button():
         if (len(butt_list))%4 ==0:
                 x= 50 + width/2
                 y = y +290   
-        butt_list.append(Button(x,y,f'{len(butt_list)+1}',180,(143, 120, 173)))
+        butt_list.append(Button(x,y,f'{len(butt_list)+1}',180,(128, 99, 166)))
         x +=width
         if (len(butt_list))%4 ==0:
                 x= 50 + width/2
                 y = y +290   
-        butt_list.append(Button(x,y,'+',180,(143, 120, 173)))
+        butt_list.append(Button(x,y,'+',180,(128, 99, 166)))
         return butt_list
             
             

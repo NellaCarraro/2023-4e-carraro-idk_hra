@@ -1,5 +1,6 @@
 import pygame
 from Button import Button
+import os
 
 class Scene:
     def __init__(self,rect_list,next_scene_index):
@@ -12,30 +13,29 @@ class Scene:
         
         
         
-    def draw(self,screen,dimension,d1_img,d2_img):
-        if dimension:
-            screen.blit(d2_img,(0,0))
-        else:
-            screen.blit(d1_img,(0,0))
+    def draw(self,screen,background):
+        screen.blit(background,(0,0))
         self.anim_index +=0.025
         if self.anim_index>2:
             self.anim_index = 0
         collectable_image = [pygame.image.load('Images/cat_1.png'),
                              pygame.image.load('Images/cat_2.png')]
+        for rect in self.collectable_list:
+            if rect[0]==False:
+                screen.blit(collectable_image[int(self.anim_index)],rect[1])
+                
+    def dev_draw(self,screen):
         for rect in self.rect_list:
             pygame.draw.rect(screen,(178,100,255),rect)
         for rect in self.trap_list:
             pygame.draw.rect(screen,(204,0,100),rect)
-        for rect in self.collectable_list:
-            if rect[0]==False:
-                screen.blit(collectable_image[int(self.anim_index)],rect[1])
     
     def check_collectable(self,player):
         for collectable in self.collectable_list:
             if collectable[0]==False and collectable[1].colliderect(player):
                 collectable[0] = True
     
-    def add_rectangle(self,screen,dimension,d1_img,d2_img):
+    def add_rectangle(self,screen,background):
         clock = pygame.time.Clock()
         click = 0
         position1 = (0,0)
@@ -54,12 +54,12 @@ class Scene:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return
-            self.draw(screen,dimension,d1_img,d2_img)
+            self.draw(screen,background)
             pygame.draw.rect(screen,(255,0,0),rect)
             clock.tick(60)
             pygame.display.update()
 
-    def add_rectangle_menu(self,screen,dimension,d1_img,d2_img):
+    def add_rectangle_menu(self,screen,background):
         clock = pygame.time.Clock()
         label_list = ['add platform','add trap']
         butt_list = Button.create_butt_list(500,200,50,(0,0,0),label_list,300,0)
@@ -69,7 +69,7 @@ class Scene:
                     if butt.activate(event):
                         butt.change_color((255,0,0))
                         butt.draw(screen)
-                        rect = self.add_rectangle(screen,dimension,d1_img,d2_img)
+                        rect = self.add_rectangle(screen,background)
                         if rect != None:
                             if butt.text == 'add platform':
                                 self.rect_list.append(rect)
@@ -85,7 +85,7 @@ class Scene:
             pygame.display.update()
 
 
-    def add_collectable(self,screen,dimension,d1_img,d2_img ):
+    def add_collectable(self,screen,background):
         clock = pygame.time.Clock()
         rect = pygame.Rect(0,0,64,64)
         while True:
@@ -100,13 +100,13 @@ class Scene:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return
-            self.draw(screen,dimension,d1_img,d2_img)
+            self.draw(screen,background)
             pygame.draw.rect(screen,(255,0,0),rect)
             clock.tick(60)
             pygame.display.update()
 
 
-    def edit_rectangle(self,screen,dimension,d1_img,d2_img,level):
+    def edit_rectangle(self,screen,level,background):
         clock = pygame.time.Clock()
         rect_list=[]
         while True:
@@ -124,18 +124,20 @@ class Scene:
                     if level.win_square.collidepoint(pygame.mouse.get_pos()):
                         rect_list.append(level.win_square) 
                     if rect_list:
-                        self.place_rectangle(screen,dimension,d1_img,d2_img,rect_list)
-                    return
+                        delete_list = self.place_rectangle(screen,background,rect_list)
+                        self.delete_rectangle(delete_list)
+                        return
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return
             clock.tick(60)
             pygame.display.update()
 
-    def place_rectangle(self,screen,dimension,d1_img,d2_img,rect_list):
+    def place_rectangle(self,screen,background,rect_list):
         clock = pygame.time.Clock()
         i=0
         position = rect_list[i].center
+        delete_list= []
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEMOTION:
@@ -144,18 +146,36 @@ class Scene:
                     if i+1<len(rect_list):
                         position = rect_list[i].center
                         i=+1
-                    else:return
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    rect_list[i].center = position
-                    if i+1<len(rect_list):
-                        position = rect_list[i].center
-                        i=+1
-                    else:return
-            self.draw(screen,dimension,d1_img,d2_img)
+                    else:return delete_list
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        rect_list[i].center = position
+                        if i+1<len(rect_list):
+                            position = rect_list[i].center
+                            i=+1
+                        else:return delete_list
+                    if event.key == pygame.K_DELETE:
+                        delete_list.append(rect_list[i])
+                        rect_list.pop(i)
+                        if i+1<len(rect_list):
+                            i+=1
+                        else:return delete_list
+
+            self.draw(screen,background)
             pygame.draw.rect(screen,(255,0,0),rect_list[i])
             clock.tick(60)
             pygame.display.update()
-        
+
+    def delete_rectangle(self,delete_list):
+        if delete_list:
+            for rect in delete_list:
+                if rect in self.rect_list:
+                    self.rect_list.remove(rect)
+                if rect in self.trap_list:
+                    self.trap_list.remove(rect)
+                if [False,rect] in self.collectable_list:
+                    self.collectable_list.remove([False,rect])
+    
 
 
         
@@ -166,6 +186,7 @@ class Level:
         self.scene_list_d2 = scene_list_d2
         self.level_index = level_index
         self.level_unlock = False
+        self.dimension = False
         self.start_x = x
         self.start_y = y
         self.win_square = win_square
@@ -270,10 +291,33 @@ class Level:
             clock.tick(60)
             pygame.display.update()
 
+    def get_background(self,level_id,scene_index):
+        if self.dimension :
+            if os.path.exists(f'Images/Dimension_2/Level_{level_id+1}/scene_{scene_index+1}.png'):
+                background = pygame.image.load(f'Images/Dimension_2/Level_{level_id+1}/scene_{scene_index+1}.png').convert_alpha()
+            else:
+                background = pygame.image.load('Images/Dimension_2/background.png').convert_alpha()
+        elif os.path.exists(f'Images/Dimension_1/Level_{level_id+1}/scene_{scene_index+1}.png'):
+            background = pygame.image.load(f'Images/Dimension_1/Level_{level_id+1}/scene_{scene_index+1}.png').convert_alpha()
+        else:
+            background = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
+        return background
     
-
-        
-        #start and finish i guess bude tady
+    def get_score_border(self):
+        if self.dimension:
+            return pygame.image.load('Images/Dimension_2/score_border.png')
+        else:
+            return pygame.image.load('Images/Dimension_1/score_border.png')
+    def get_menu(self):
+        if self.dimension:
+            return pygame.image.load('Images/Dimension_2/menu_screen.png')
+        else:
+            return pygame.image.load('Images/Dimension_1/menu_screen.png')
+    def get_color(self):
+        if self.dimension:
+            return (252, 121, 121)
+        else:
+            return(128, 99, 166)
         
         
         

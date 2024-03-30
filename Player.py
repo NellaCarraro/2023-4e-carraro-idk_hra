@@ -2,28 +2,10 @@ import pygame
 from Button import Button
 
 class Player(pygame.sprite.Sprite):
-    #incializani metoda
     def __init__(self,level):
         super().__init__()
-        self.player_image_list = [
-                             [pygame.image.load('Images/player_stand_1.png')
-                             ,pygame.image.load('Images/player_stand_2.png')
-                             ,pygame.image.load('Images/player_stand_3.png')
-                             ,pygame.image.load('Images/player_stand_4.png')],
-                             [pygame.image.load('Images/player_run1.png')
-                             ,pygame.image.load('Images/player_run2.png')
-                             ,pygame.image.load('Images/player_run3.png')
-                             ,pygame.image.load('Images/player_run4.png')],
-                             [pygame.image.load('Images/player_jump_1.png')
-                             ,pygame.image.load('Images/player_jump_2.png')
-                             ,pygame.image.load('Images/player_jump_3.png')
-                             ,pygame.image.load('Images/player_jump_4.png')],
-                             [pygame.image.load('Images/player_fall_1.png')
-                             ,pygame.image.load('Images/player_fall_2.png')
-                             ,pygame.image.load('Images/player_fall_3.png')
-                             ,pygame.image.load('Images/player_fall_4.png')]
-                             ]
-        self.image = self.player_image_list[0][0]
+        self.player_anim_list = Player.create_anim_list(['Stand/player_stand','Run/player_run','Jump/player_jump','Fall/player_fall'])
+        self.image = self.player_anim_list[0][0]
         self.rect = self.image.get_rect(bottomleft=(level.start_x,level.start_y))
         self.level = level
         self.anim_index = 0
@@ -35,7 +17,19 @@ class Player(pygame.sprite.Sprite):
         self.double_jump = False
         self.death = False
         self.face_side = 'r'
-    
+
+    def create_anim_list(name_list):
+        player_anim_list =[]
+        for name in name_list:
+            i = 1
+            anim_list =[]
+            while i<5:
+                anim_list.append(pygame.image.load(f'Images/Player/{name}_{i}.png'))
+                i+=1
+            player_anim_list.append(anim_list)
+        return player_anim_list
+        
+        
     def update(self,scene_list): 
         Player.input(self)
         if Player.collisions(self,scene_list[self.scene_index]):
@@ -43,11 +37,11 @@ class Player(pygame.sprite.Sprite):
         Player.animation(self)
         self.next_scene(scene_list)
        
-            
+    
         
     def animation(self):
-        anim_list = self.player_image_list[self.anime_list_index]
-        self.anim_index +=0.12
+        anim_list = self.player_anim_list[self.anime_list_index]
+        self.anim_index +=0.1
         if self.anim_index > len(anim_list):
             self.anim_index = 0
         self.image = anim_list[int(self.anim_index)]
@@ -70,14 +64,14 @@ class Player(pygame.sprite.Sprite):
                 self.anime_list_index = 1
             if self.face_side == 'l':
                 self.face_side = 'r'
-                self.player_image_list = self.flip_image_list(self.player_image_list)
+                self.player_anim_list = self.flip_image_list(self.player_anim_list)
         elif key[pygame.K_a]:
             self.rect.x -=6
             if self.anime_list_index <2:
                 self.anime_list_index = 1
             if self.face_side == 'r':
                 self.face_side = 'l'
-                self.player_image_list = self.flip_image_list(self.player_image_list)
+                self.player_anim_list = self.flip_image_list(self.player_anim_list)
 
         else:
             if self.anime_list_index <2:
