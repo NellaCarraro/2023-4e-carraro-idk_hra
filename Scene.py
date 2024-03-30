@@ -23,7 +23,7 @@ class Scene:
         for rect in self.collectable_list:
             if rect[0]==False:
                 screen.blit(collectable_image[int(self.anim_index)],rect[1])
-                
+
     def dev_draw(self,screen):
         for rect in self.rect_list:
             pygame.draw.rect(screen,(178,100,255),rect)
@@ -267,7 +267,6 @@ class Level:
         clock = pygame.time.Clock()
         label_list = ['right','left','up','down']
         next_scene_index = 'none'
-        #dim_button = Button(700,400,'dimension: true',100,(0,0,0))
         butt_list = Button.create_butt_list(400,300,75,(0,0,0),label_list,150,0)
         add_button = Button(700,400,'Add scene',75,(255,0,0))
         while True:

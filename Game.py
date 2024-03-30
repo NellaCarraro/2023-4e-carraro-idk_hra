@@ -5,18 +5,15 @@ from Player import Player
 from Button import Button
 from Scene import Level, Scene
 import time
-#display level, display score
-#update collectables if death or win  and time currently jsut re writes the old shit
 
 class Game:
     def __init__(self):
         pygame.init()
-        Game.temp(self)
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((1400,800))
         self.level_list = Game.load(self)
+        self.level_list[0].level_unlock = True
         self.color= (128, 99, 166)
-        #self.color_2=   (252, 121, 121)
         Game.start_screen(self)
         
 
@@ -141,7 +138,9 @@ class Game:
     def load(self):
         if os.path.exists('levels'):
             level_list = open('levels','rb')
-            return pickle.load(level_list) 
+            return pickle.load(level_list)
+        else:
+            return([self.new_level()])
             
     def level_select(self,level_list):
         self.clock.tick(60)
@@ -275,26 +274,21 @@ class Game:
             pygame.quit()
             exit()
 
-    def temp(self):
-        rect_list1 = [pygame.Rect(0,750,1200,100),]
-        rect_list2 = [pygame.Rect(0,780,1200,100),]
-        rect_list3 = [pygame.Rect(0,780,1200,100),]
-        rect_list4 = [pygame.Rect(0,780,1200,100),]
-        trap_list = pygame.Rect(200,500,50,50)
-        lev1 = Scene(rect_list1,'left')
-        lev2 = Scene(rect_list2,'')
-        lev3 = Scene(rect_list3,'left')
-        lev4 = Scene(rect_list4,'')
-        lev1.trap_list.append(trap_list)
-        lev1.collectable_list.append([False,pygame.Rect(200,630,64,64)])
-        lev2.collectable_list.append([False,pygame.Rect(300,630,64,64)])
-        lev3.collectable_list.append([False,pygame.Rect(400,630,64,64)])
-        lev4.collectable_list.append([False,pygame.Rect(500,630,64,64)])
-        scene_list = [lev1,lev2]
-        scene_list2 = [lev3,lev4]
-        level_list = [Level(scene_list,scene_list2,0,0,500,pygame.Rect(1300,450,100,100))]
-        level_list[0].level_unlock = True
-        self.save(level_list)
+    def add_level(self,butt_list):
+        self.level_list.append(self.new_level())
+        butt_list = Button.add_level_select_button(butt_list)
+        return butt_list
+
+
+    def new_level(self):
+        rect_list1 = [pygame.Rect(30,750,100,100),]
+        rect_list2 = [pygame.Rect(30,750,100,100),]
+        sce1= Scene(rect_list1,'')
+        sce2 = Scene(rect_list2,'')
+        scene_list = [sce1]
+        scene_list2 = [sce2]
+        return (Level(scene_list,scene_list2,0,50,600,pygame.Rect(1300,450,100,150))
+                )
 
     def dev_menu(self):
         butt_list_label =['add scene','add rectangle','add collectable','edit rectangle']
@@ -321,17 +315,6 @@ class Game:
         return level
 
     
-    def add_level(self,butt_list):
-        rect_list1 = [pygame.Rect(0,750,160,100),]
-        rect_list2 = [pygame.Rect(0,750,160,100),]
-        lev1 = Scene(rect_list1,'')
-        lev2 = Scene(rect_list2,'')
-        scene_list1 = [lev1]
-        scene_list2 = [lev2]
-        level = Level(scene_list1,scene_list2,0,0,500,pygame.Rect(1300,750,100,100))
-        self.level_list.append(level)
-        butt_list = Button.add_level_select_button(butt_list)
-        return butt_list
-
+    
 game = Game()
 
