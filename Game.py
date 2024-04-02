@@ -295,7 +295,7 @@ class Game:
         sce2 = Scene(rect_list2, '')
         scene_list = [sce1]
         scene_list2 = [sce2]
-        return (Level(scene_list, scene_list2, 0, 50, 600, pygame.Rect(1300, 450, 100, 150))
+        return (Level(scene_list, scene_list2, 50, 600, pygame.Rect(1300, 450, 100, 150))
                 )
 
     def dev_menu(self):
