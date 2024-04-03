@@ -65,6 +65,7 @@ class Game:
         score_border = level.get_score_border()
         background = level.get_background(level_index, scene_index)
         start_time = time.time()
+        dimension_backround = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
 
         while True:
             for event in pygame.event.get():
@@ -83,6 +84,8 @@ class Game:
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
+                                dimension_backround = pygame.image.load('Images/Dimension_2/background.png').convert_alpha()
+                                
                         else:
                             if player.harsh_collisions(level.scene_list_d1[scene_index]) == False:
                                 level.dimension = False
@@ -92,12 +95,14 @@ class Game:
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
+                                dimension_backround = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
                     if event.key == pygame.K_F12:
                         self.screen = pygame.display.set_mode((1800, 800))
                         dev_state = True
                 if dev_state:
                     level = Game.dev_event_loop(
                         self, event, dev_butt_list, level, scene, background)
+            self.screen.blit(dimension_backround,(0,0))
             scene = scene_list[scene_index]
             if level.dimension == False and player.win(scene_list):
                 Game.next_level_menu(self, level_index, start_time, level)
