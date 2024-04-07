@@ -79,8 +79,6 @@ class Game:
                             if player.harsh_collisions(level.scene_list_d2[scene_index]) == False:
                                 level.dimension = True
                                 scene_list = level.scene_list_d2
-                                background = level.get_background(
-                                    level_index, scene_index)
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
@@ -90,8 +88,6 @@ class Game:
                             if player.harsh_collisions(level.scene_list_d1[scene_index]) == False:
                                 level.dimension = False
                                 scene_list = level.scene_list_d1
-                                background = level.get_background(
-                                    level_index, scene_index)
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
@@ -101,20 +97,20 @@ class Game:
                         dev_state = True
                 if dev_state:
                     level = Game.dev_event_loop(
-                        self, event, dev_butt_list, level, scene, background)
+                        self, event, dev_butt_list, level, scene, background,dimension_backround)
             self.screen.blit(dimension_backround,(0,0))
-            scene = scene_list[scene_index]
             if level.dimension == False and player.win(scene_list):
                 Game.next_level_menu(self, level_index, start_time, level)
             scene.check_collectible(player)
             player.update(scene_list)
             scene_index = player.scene_index
+            scene = scene_list[scene_index]
+            background = level.get_background(level_index, scene_index)
             scene.draw(self.screen, background)
             self.screen.blit(score_border, (0, 0))
             Game.update_score(self, lab_list, start_time, level)
             player_sprite.draw(self.screen)
-            Game.draw_dev_menu(self, dev_state, dev_butt_list,
-                               level, scene_index, scene)
+            Game.draw_dev_menu(self, dev_state, dev_butt_list,level, scene_index, scene)
             if player.death:
                 Game.death_screen(self, level_index, level)
             Game.update(self)
@@ -319,15 +315,15 @@ class Game:
                                  level.win_square)
             scene.dev_draw(self.screen)
 
-    def dev_event_loop(self, event, dev_butt_list, level, scene, background):
+    def dev_event_loop(self, event, dev_butt_list, level, scene, background,dimension_backround):
         if dev_butt_list[0].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_1):
             level.add_scene(self.screen)
         if dev_butt_list[1].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_2):
-            scene.add_rectangle_menu(self.screen, background)
+            scene.add_rectangle_menu(self.screen, background,dimension_backround)
         if dev_butt_list[2].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_3):
-            scene.add_collectible(self.screen, background)
+            scene.add_collectible(self.screen, background,dimension_backround)
         if dev_butt_list[3].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_4):
-            scene.edit_rectangle(self.screen, level, background)
+            scene.edit_rectangle(self.screen, level, background,dimension_backround)
         return level
 
 

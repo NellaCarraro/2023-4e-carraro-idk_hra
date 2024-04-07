@@ -33,7 +33,7 @@ class Scene:
             if collectible[0] == False and collectible[1].colliderect(player):
                 collectible[0] = True
 
-    def add_rectangle(self, screen, background):
+    def add_rectangle(self, screen, background,dimension_backround):
         clock = pygame.time.Clock()
         click = 0
         position1 = (0, 0)
@@ -53,13 +53,14 @@ class Scene:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return
+            screen.blit(dimension_backround,(0,0))
             self.draw(screen, background)
             self.dev_draw(screen)
             pygame.draw.rect(screen, (255, 0, 0), rect)
             clock.tick(60)
             pygame.display.update()
 
-    def add_rectangle_menu(self, screen, background):
+    def add_rectangle_menu(self, screen, background,dimension_backround):
         clock = pygame.time.Clock()
         label_list = ['add platform', 'add trap']
         butt_list = Button.create_butt_list(
@@ -68,7 +69,7 @@ class Scene:
             for event in pygame.event.get():
                 for butt in butt_list:
                     if butt.activate(event):
-                        rect = self.add_rectangle(screen, background)
+                        rect = self.add_rectangle(screen, background,dimension_backround)
                         if rect != None:
                             if butt.text == 'add platform':
                                 self.rect_list.append(rect)
@@ -76,7 +77,7 @@ class Scene:
                                 self.trap_list.append(rect)
                         return
                     if event.type == pygame.KEYDOWN:
-                        rect = self.add_rectangle(screen, background)
+                        rect = self.add_rectangle(screen, background,dimension_backround)
                         if rect != None:
                             if event.key == pygame.K_ESCAPE:
                                 if event.key == pygame.K_q:
@@ -90,7 +91,7 @@ class Scene:
             clock.tick(60)
             pygame.display.update()
 
-    def add_collectible(self, screen, background):
+    def add_collectible(self, screen, background,dimension_backround):
         clock = pygame.time.Clock()
         rect = pygame.Rect(0, 0, 64, 64)
         while True:
@@ -105,12 +106,13 @@ class Scene:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         return
+            screen.blit(dimension_backround,(0,0))
             self.draw(screen, background)
             pygame.draw.rect(screen, (255, 0, 0), rect)
             clock.tick(60)
             pygame.display.update()
 
-    def edit_rectangle(self, screen, level, background):
+    def edit_rectangle(self, screen, level, background,dimension_backround):
         clock = pygame.time.Clock()
         rect_list = []
         while True:
@@ -129,7 +131,7 @@ class Scene:
                         rect_list.append(level.win_square)
                     if rect_list:
                         delete_list = self.place_rectangle(
-                            screen, background, rect_list)
+                            screen, background, rect_list,dimension_backround)
                         self.delete_rectangle(delete_list)
                         return
                 if event.type == pygame.KEYDOWN:
@@ -138,7 +140,7 @@ class Scene:
             clock.tick(60)
             pygame.display.update()
 
-    def place_rectangle(self, screen, background, rect_list):
+    def place_rectangle(self, screen, background, rect_list,dimension_backround):
         clock = pygame.time.Clock()
         i = 0
         position = rect_list[i].center
@@ -168,7 +170,7 @@ class Scene:
                             i += 1
                         else:
                             return delete_list
-
+            screen.blit(dimension_backround,(0,0))
             self.draw(screen, background)
             self.dev_draw(screen)
             pygame.draw.rect(screen, (255, 0, 0), rect_list[i])

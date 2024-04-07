@@ -153,8 +153,6 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom -= self.gravity
         if self.gravity > -15:
             self.gravity -= 0.85
-        if self.rect.collidelistall(scene.trap_list):
-            return True
         if self.rect.collidelistall(scene.rect_list):
             collide_list = self.rect.collidelistall(scene.rect_list)
             for i in collide_list:
@@ -174,6 +172,8 @@ class Player(pygame.sprite.Sprite):
                     self.rect.right = scene.rect_list[i].left
                 if self.rect.left < scene.rect_list[i].right and self.rect.left > scene.rect_list[i].right-14:
                     self.rect.left = scene.rect_list[i].right
+        if self.rect.collidelistall(scene.trap_list):
+            return True
 
     def harsh_collisions(self, scene):
         if self.rect.collidelistall(scene.trap_list):
