@@ -325,15 +325,15 @@ class Level:
 
     def get_score_border(self):
         if self.dimension:
-            return pygame.image.load('Images/Dimension_2/score_border.png')
+            return pygame.image.load('Images/Dimension_2/score_border.png').convert_alpha()
         else:
-            return pygame.image.load('Images/Dimension_1/score_border.png')
+            return pygame.image.load('Images/Dimension_1/score_border.png').convert_alpha()
 
     def get_menu(self):
         if self.dimension:
-            return pygame.image.load('Images/Dimension_2/menu_screen.png')
+            return pygame.image.load('Images/Dimension_2/menu_screen.png').convert_alpha()
         else:
-            return pygame.image.load('Images/Dimension_1/menu_screen.png')
+            return pygame.image.load('Images/Dimension_1/menu_screen.png').convert_alpha()
 
     def get_color(self):
         if self.dimension:
