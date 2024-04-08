@@ -18,7 +18,6 @@ class Game:
         Game.start_screen(self)
 
     def start_screen(self):
-        self.clock.tick(60)
         background = pygame.image.load(
             'Images/Dimension_1/background.png').convert_alpha()
         pygame.display.set_caption('Melinoe')
@@ -44,7 +43,7 @@ class Game:
             self.screen.blit(start_menu, (1020, 400))
             for butt in butt_list:
                 butt.draw(self.screen)
-            pygame.display.update()
+            self.update()
 
     def event_loop(self, level_index):
         level = self.level_list[level_index]
@@ -65,7 +64,9 @@ class Game:
         score_border = level.get_score_border()
         background = level.get_background(level_index, scene_index)
         start_time = time.time()
-        dimension_backround = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
+        dimension_backround1 = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
+        dimension_backround2 = pygame.image.load('Images/Dimension_2/background.png').convert_alpha()
+        dimension_backround = dimension_backround1
 
         while True:
             for event in pygame.event.get():
@@ -82,7 +83,7 @@ class Game:
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
-                                dimension_backround = pygame.image.load('Images/Dimension_2/background.png').convert_alpha()
+                                dimension_backround = dimension_backround2
                                 
                         else:
                             if player.harsh_collisions(level.scene_list_d1[scene_index]) == False:
@@ -91,7 +92,7 @@ class Game:
                                 score_border = level.get_score_border()
                                 for label in lab_list:
                                     label.change_color(level.get_color())
-                                dimension_backround = pygame.image.load('Images/Dimension_1/background.png').convert_alpha()
+                                dimension_backround = dimension_backround1
                     if event.key == pygame.K_F12:
                         self.screen = pygame.display.set_mode((1800, 800))
                         dev_state = True
@@ -171,7 +172,7 @@ class Game:
             for butt in butt_list:
                 butt.draw(self.screen)
             title_label.draw(self.screen)
-            pygame.display.update()
+            self.update()
 
     def level_select_menu(self, level_index, butt_prev_list, background):
         level = self.level_list[level_index]
@@ -203,8 +204,7 @@ class Game:
             self.screen.blit(menu, (530, 180))
             for butt in butt_list:
                 butt.draw(self.screen)
-            pygame.display.update()
-            self.clock.tick(60)
+            self.update()
 
     def pause_menu(self, level_index):
         menu = self.level_list[level_index].get_menu()
@@ -220,8 +220,7 @@ class Game:
             self.screen.blit(menu, (530, 180))
             for butt in butt_list:
                 butt.draw(self.screen)
-            self.clock.tick(60)
-            pygame.display.update()
+            self.update()
 
     def death_screen(self, level_index, level):
         menu = level.get_menu()
@@ -234,8 +233,7 @@ class Game:
             self.screen.blit(menu, (530, 180))
             for butt in butt_list:
                 butt.draw(self.screen)
-            self.clock.tick(60)
-            pygame.display.update()
+            self.update()
 
     def next_level_menu(self, level_index, start_time, level):
         if level_index+1 < len(self.level_list):
@@ -255,8 +253,7 @@ class Game:
             self.screen.blit(menu, (530, 180))
             for butt in butt_list:
                 butt.draw(self.screen)
-            self.clock.tick(60)
-            pygame.display.update()
+            self.update()
 
     def small_menu_buttons(self, level_index):
         butt_list = Button.create_butt_list(700, 340, 50, self.level_list[level_index].get_color(), [
@@ -307,6 +304,7 @@ class Game:
         return butt_list
 
     def draw_dev_menu(self, dev_state, dev_butt_list, level, scene_index, scene):
+        
         if dev_state:
             for butt in dev_butt_list:
                 butt.draw(self.screen)
@@ -314,6 +312,9 @@ class Game:
                 pygame.draw.rect(self.screen, (100, 200, 200),
                                  level.win_square)
             scene.dev_draw(self.screen)
+            fps_font = pygame.font.Font('EnchantedSword.ttf', 30)
+            fps_text = fps_font.render(str(self.clock.get_fps()), False, (0, 255, 0))
+            self.screen.blit(fps_text, (0, 0))
 
     def dev_event_loop(self, event, dev_butt_list, level, scene, background,dimension_backround):
         if dev_butt_list[0].activate(event) or (event.type == pygame.KEYDOWN and event.key == pygame.K_1):
